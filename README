@@ -1,0 +1,18 @@
+A reification of CL's type system, designed to allow exploration by being extensible.
+
+Rather than type _specifiers_, the system is based on "ctypes", which are much nicer-to-deal-with objects.
+The subtypep and ctypep equivalents are generic functions specialized on these objects.
+
+In CL types are said to be sets; sandalphon.types continues this. The primary functions are CTYPEP and CSUBTYPEP, representing set membership and subset respectively. The idea is that these operations should be all that is necessary to use types usefully, allowing vast latitude in what a type actually _is_.
+
+Because various parts of the type system are uncomputable, CSUBTYPEP works like CL:SUBTYPEP in returning a second return value representing surety - so if the relationship between two types cannot be reliably or computably determined, CSUBTYPEP can just return (VALUES NIL NIL) on them. To assist working with this and related predicates, various tri/ macros and functions are exported and work analogously to their untri/ counterparts.
+
+CSUBTYPEP uses a funky method combination, TRI/DEFINITE. It's just a short form method-combination that takes the first result to have a true second value (i.e. definiteness).
+
+UNION/2 and INTERSECTION/2 may be specialized on to improve the union and intersection operations, but this is optional: UNION-CTYPE and INTERSECTION-CTYPE are used by default.
+
+Classes are usable as CTYPEs. CTYPEP uses CL:TYPEP when given a CLASS, and CSUBTYPEP uses CL:SUBTYPEP when given two classes. Relationships between CLASSes and CTYPEs are however otherwise undefined (that is, (csubtypep some-class some-ctype) => (values nil nil), and so on).
+
+Type specifiers may be parsed into CTYPEs with SPECIFIER-TYPE (runtime) or CTYPE (compile time). DEFTYPEMACRO is analogous to DEFTYPE for this (see specs.lisp for examples), but TYPEMACROLET and (SETF TYPEXPANDER) are also available analogously to MACROLET and (SETF MACRO-FUNCTION). (SETF SPECIFIER-TYPE) and (SETF CTYPE) are available as convenience wrappers over (SETF TYPEXPANDER). Types are envisioned as being compile-time constructs, so all of these operations work with compilation environments.
+
+CTYPEs and CLASSes may be unparsed using the generic function TYPE-SPECIFIER. This function is also used in printing CTYPEs.
