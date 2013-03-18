@@ -137,12 +137,12 @@
 ;;; setshit
 
 (deftypemacro and (&whole spec &rest specs &environment env)
-  (unless (listp spec) (error "There is no list form for specifier ~s" (first spec)))
+  (unless (listp spec) (error "There is no atomic form for specifier ~s" (first spec)))
   (cond ((null specs) (top))
 	((null (rest specs)) (specifier-type (first specs) env))
 	(t (apply #'ctype-intersection (mapcar (rcurry #'specifier-type env) specs)))))
 (deftypemacro or (&whole spec &rest specs &environment env)
-  (unless (listp spec) (error "There is no list form for specifier ~s" (first spec)))
+  (unless (listp spec) (error "There is no atomic form for specifier ~s" (first spec)))
   (cond ((null specs) (bottom))
 	((null (rest specs)) (specifier-type (first specs) env))
 	(t (apply #'ctype-union (mapcar (rcurry #'specifier-type env) specs)))))
@@ -156,7 +156,7 @@
 ;;; member
 
 (deftypemacro member (&whole spec &rest objects)
-  (unless (listp spec) (error "There is no list form for specifier ~s" (first spec)))
+  (unless (listp spec) (error "There is no atomic form for specifier ~s" (first spec)))
   (make-instance 'member-ctype :objects objects))
 
 (deftypemacro eql (object)

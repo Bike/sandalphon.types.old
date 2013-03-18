@@ -72,7 +72,7 @@
 	   (lambda (form env)
 	     (declare (ignore env))
 	     (unless (eq form ,specifier)
-	       (error "There is no list form for specifier ~s" ,specifier))
+	       (error "There is no atomic form for specifier ~s" ,specifier))
 	     ,new-ctype))
      ,new-ctype))
 
