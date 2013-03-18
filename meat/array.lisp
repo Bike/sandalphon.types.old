@@ -46,6 +46,19 @@
 (defmethod csubtypep tri/definite ((t1 array-ctype) (t2 (eql (bottom))))
   (values nil t))
 
+(defmethod csubtypep tri/definite ((t1 array-ctype) (t2 class))
+  (cond ((cl:subtypep (find-class 'array) t2) (values t t))
+	((tri/not (cl:subtypep t2 (find-class 'array))) (values nil t))
+	(t (values nil nil))))
+
+(defcomm intersection/2 ((t1 array-ctype) (t2 class))
+  (if (cl:subtypep t2 (find-class 'array)) ; subclass should be always computable
+      (call-next-method)
+      (bottom)))
+
+(defmethod csubtypep tri/definite ((t1 array-ctype) (t2 (eql (find-class 'sequence))))
+  (values t t))
+
 ;;; ads = array-dimensions-spec
 
 (defun canonicalize-ads (spec)
@@ -159,9 +172,6 @@ For example, STRING is an array type whose element type is an ARRAY-ELEMENT-UNIO
 		   (ads-<\: t1d t2d)
 		   (or (not (sub-element-type-p t2et t1et)) (not t2s) t1s))
 	      t))))
-
-(defmethod csubtypep tri/definite ((t1 array-ctype) (t2 (eql (find-class 'sequence))))
-  (values t t))
 
 (defmethod union/2 ((t1 array-ctype) (t2 array-ctype))
   (if (ctype= (array-ctype-element-type t1) (array-ctype-element-type t2))

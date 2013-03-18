@@ -220,10 +220,19 @@ Useful for testing."))
     (dunno (csubtypep mystery (negate-ctype mystery)))
     (dunno (csubtypep (negate-ctype mystery) mystery))))
 
+;;; no more relationships i guess
+(test class-types
+  (mapc (lambda (name)
+	  (is-true (ctype= (specifier-type name) (find-class name))
+		   "~s the type and ~:*~s the class are not type-equivalent"
+		   name))
+	*types-with-classes*))
+
 ;;; I'm thinking this test isn't needed. The types being pairwise disjoint doesn't have to mean that
 ;;;  the intersection of the ctypes /has/ to be bottom.
 ;;; It would be kind of nice if they were, but right now I think it might be more trouble than it's worth.
-#+(or)
+;;; or not. nasty :around on class-class but I'm just that anal. see clos.lisp, and disjoin.lisp.
+
 (test primitive-disjointness
   (let ((prims (mapcar #'specifier-type
 		       '(cons symbol array number character hash-table function readtable

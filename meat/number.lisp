@@ -115,7 +115,7 @@
 (defmethod csubtypep tri/definite ((t1 complex-ctype) (t2 complex-ctype))
   ;; not sure about this either
   (cond ((not (slot-boundp t1 'part-type))
-	 (values (slot-boundp t2 'part-type) t))
+	 (values (not (slot-boundp t2 'part-type)) t))
 	((not (slot-boundp t2 'part-type))
 	 (values t t))
 	(t (ctype= (complex-ctype-part-type t1) (complex-ctype-part-type t2)))))

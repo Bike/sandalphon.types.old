@@ -26,4 +26,6 @@
 				     (:file "clos")
 				     (:file "array" :depends-on (#+s.t.prim "primitive"))))
 	       (:file "specs" :depends-on ("meat" "parse" "package"))
-	       (:file "unparse" :depends-on ("meat" "package"))))
+	       (:file "unparse" :depends-on ("meat" "package"))
+	       (:file "clos-fixup" :depends-on ("types" "meat" "package"))
+	       (:file "disjoin" :depends-on ("types" "meat" "package"))))
