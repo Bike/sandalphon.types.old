@@ -41,6 +41,11 @@
    (dimensions :accessor array-ctype-dimensions :initarg :dimensions
 	       :initform '*)))
 
+(defmethod csubtypep tri/definite ((t1 (eql (top))) (t2 array-ctype))
+  (values nil t))
+(defmethod csubtypep tri/definite ((t1 array-ctype) (t2 (eql (bottom))))
+  (values nil t))
+
 ;;; ads = array-dimensions-spec
 
 (defun canonicalize-ads (spec)

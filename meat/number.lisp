@@ -11,6 +11,11 @@
   ((format :accessor real-ctype-format :initarg :format)
    (interval :accessor real-ctype-interval :initarg :interval)))
 
+(defmethod csubtypep tri/definite ((t1 (eql (top))) (t2 real-ctype))
+  (values nil t))
+(defmethod csubtypep tri/definite ((t1 real-ctype) (t2 (eql (bottom))))
+  (values nil t))
+
 (defmethod csubtypep tri/definite ((t1 real-ctype) (t2 class))
   (cl:subtypep (real-ctype-format t1) t2))
 (defcomm intersection/2 ((t1 real-ctype) (t2 class))
@@ -44,7 +49,7 @@
 	(t nil)))
 
 (defun subformatp (f1 f2)
-  (values (cl:subtypep f1 f2)))
+  (cl:subtypep f1 f2))
 
 (defmethod union/2 ((t1 real-ctype) (t2 real-ctype))
   (let ((new-interval (interval-union/2 (real-ctype-interval t1) (real-ctype-interval t2)))
@@ -64,9 +69,10 @@
 	(call-next-method))))
 
 (defmethod csubtypep tri/definite ((t1 real-ctype) (t2 real-ctype))
-  (if (subformatp (real-ctype-format t1) (real-ctype-format t2))
-      (values (subintervalp (real-ctype-interval t1) (real-ctype-interval t2)) t)
-      (values nil nil)))
+  (tri/if (subformatp (real-ctype-format t1) (real-ctype-format t2))
+	  (values (subintervalp (real-ctype-interval t1) (real-ctype-interval t2)) t)
+	  (values nil t)
+	  (values nil nil)))
 
 (defmethod ctypep (object (ctype real-ctype))
   (and (cl:typep object (real-ctype-format ctype))
@@ -76,6 +82,11 @@
 
 (defclass complex-ctype (#+s.t.prim primitive-ctype #-s.t.prim ctype)
   ((part-type :accessor complex-ctype-part-type :initarg :part)))
+
+(defmethod csubtypep tri/definite ((t1 (eql (top))) (t2 complex-ctype))
+  (values nil t))
+(defmethod csubtypep tri/definite ((t1 complex-ctype) (t2 (eql (bottom))))
+  (values nil t))
 
 (defmethod csubtypep tri/definite ((t1 complex-ctype) (t2 (eql (the-ctype-number))))
   (values t t))

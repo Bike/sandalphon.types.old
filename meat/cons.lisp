@@ -8,6 +8,11 @@
   ((car-type :accessor cons-ctype-car-type :initarg :car)
    (cdr-type :accessor cons-ctype-cdr-type :initarg :cdr)))
 
+(defmethod csubtypep tri/definite ((t1 (eql (top))) (t2 cons-ctype))
+  (values nil t))
+(defmethod csubtypep tri/definite ((t1 cons-ctype) (t2 (eql (bottom))))
+  (values nil t))
+
 (defmethod union/2 ((t1 cons-ctype) (t2 cons-ctype))
    (let ((car-union
           (union/2 (cons-ctype-car-type t1) (cons-ctype-car-type t2)))

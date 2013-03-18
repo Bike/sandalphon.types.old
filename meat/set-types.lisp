@@ -106,7 +106,7 @@
 	    ;; surely not (subtypep '(not integer) 'real), surely not (subtypep '(not integer) 'integer)
 	    ;; surely not (subtypep '(not nil) 'real), surely (subtypep '(not nil) 't), surely (subtypep '(not t) 't)
 	    ;; surely not (subtypep '(not nil) 'nil)
-	    (tri/or (top-type-p neg)
+	    (tri/or (top-type-p t2)
 		    (tri/and (bottom-type-p neg) (top-type-p t2)))
 	    ;; surely not (subtypep '(not real) 'integer), surely not (subtypep '(not string) 'integer)
 	    ;; surely (subtypep '(not t) 'nil), surely (subtypep '(not t) 'real), surely not (subtypep '(not real) 'nil)

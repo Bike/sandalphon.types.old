@@ -13,12 +13,15 @@
       (unknown-type ()
 	(fail "~s couldn't be parsed" spec)))))
 
-(defmacro ssubtypep (t1 t2)
-  `(is (csubtypep (specifier-type ',t1) (specifier-type ',t2))
-       "~s is not a recognizable subtype of ~s" ',t1 ',t2))
+(defmacro dcsubtypep (t1 t2)
+  `(csubtypep (specifier-type ',t1) (specifier-type ',t2)))
+
+(defmacro scsubtypep (t1 t2)
+  `(is-true (dcsubtypep ,t1 ,t2)
+	    "~s is not a recognizable subtype of ~s" ',t1 ',t2))
 
 (defmacro subtypes (type &rest parents)
-  `(progn ,@(mapcar (curry #'list 'ssubtypep type) parents)))
+  `(progn ,@(mapcar (curry #'list 'scsubtypep type) parents)))
 
 (test standard-atomic-subtypery/a
   (subtypes arithmetic-error error serious-condition condition t)
@@ -147,8 +150,12 @@
   (:documentation "A class with no behavior other than that from CTYPE defined.
 Useful for testing."))
 
+(deftypemacro mystery ()
+  ;; allocates anew each time
+  (make-instance 'mysterious-ctype))
+
 (test identities
-  (let ((mystery (make-instance 'mysterious-ctype)))
+  (let ((mystery (ctype mystery)))
     ;;; note that these (should) work on one particular ctype, rather than just two instances of the same class.
     ;; eqlity implies type equality
     (is (ctype= mystery mystery))
@@ -160,7 +167,58 @@ Useful for testing."))
     ;; bottom is a subtype of everything
     (is (csubtypep (ctype nil) mystery))
     ;; everything is a subtype of top
-    (is (csubtypep mystery (ctype t)))))
+    (is (csubtypep mystery (ctype t)))
+    (is (csubtypep (ctype-intersection mystery (ctype real)) mystery))
+    (is (csubtypep mystery (ctype-union mystery (ctype string))))))
+
+(defmacro surely-not (form)
+  `(is (equal '(nil t) (multiple-value-list ,form))
+       "~s was not surely false" ',form))
+
+(test negations
+  ;; neg and neg
+  (scsubtypep (not real) (not real)) ; reflexiveness implies negareflexiveness
+  (scsubtypep (not t) (not t)) ; for weirdos
+  (scsubtypep (not nil) (not nil))
+  (scsubtypep (not real) (not integer)) ; contraposition
+  (scsubtypep (not t) (not nil)) ; for weirdos
+
+  ;; pos and neg
+  (surely-not (dcsubtypep integer (not real)))
+  (scsubtypep nil (not mystery))
+
+  (surely-not (dcsubtypep real (not integer)))
+  (scsubtypep real (not string))
+  (scsubtypep real (not nil))
+  (scsubtypep t (not nil))
+
+  ;; neg and pos
+  (surely-not (dcsubtypep (not integer) real))
+  (surely-not (dcsubtypep (not integer) integer))
+  (surely-not (dcsubtypep (not nil) real))
+  (scsubtypep (not nil) t)
+  (scsubtypep (not t) t)
+  (surely-not (dcsubtypep (not nil) nil))
+
+  (surely-not (dcsubtypep (not real) integer))
+  (surely-not (dcsubtypep (not string) integer))
+  (scsubtypep (not t) nil)
+  (scsubtypep (not t) mystery)
+  (surely-not (dcsubtypep (not real) nil)))
+
+(defmacro dunno (form)
+  `(is (equal '(nil nil) (multiple-value-list ,form))
+       "~s was not surely false" ',form))
+
+(test disidentities
+  ;; you might think that for all types X, X surely doesn't subtype ¬X, and ¬X doesn't subtype X.
+  ;; but you'd be wrong - ¬top subtypes top, and bottom subtypes ¬bottom.
+  ;; while those two are unique in this respect, it means that for an unknown type (like mystery),
+  ;; we can't say ¬mystery doesn't subtype mystery, or the converse, because mystery might turn out to be T or NIL.
+  ;; (the case of a type definitely not being T or NIL is handled in negations)
+  (let ((mystery (ctype mystery)))
+    (dunno (csubtypep mystery (negate-ctype mystery)))
+    (dunno (csubtypep (negate-ctype mystery) mystery))))
 
 ;;; I'm thinking this test isn't needed. The types being pairwise disjoint doesn't have to mean that
 ;;;  the intersection of the ctypes /has/ to be bottom.
