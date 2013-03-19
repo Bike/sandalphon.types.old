@@ -166,6 +166,41 @@
 
 (deftypemacro compiled-function () '(and function (satisfies compiled-function-p)))
 
+;;; values
+
+(deftypemacro values (&whole spec &rest lambda-list &environment env)
+  (unless (listp spec) (error "There is no atomic form for specifier ~s" 'values))
+  (multiple-value-bind (req opt rest restp aok-p) (parse-values-lambda-list lambda-list)
+    (make-instance 'values-ctype
+		   :req (mapcar (rcurry #'specifier-type env) req)
+		   :opt (mapcar (rcurry #'specifier-type env) opt)
+		   :rest (if restp (specifier-type rest env) nil)
+		   :aok-p aok-p)))
+
+(defun parse-values-lambda-list (lambda-list)
+  (let ((state :required)
+	required optional rest restp aok-p)
+    (dolist (spec lambda-list)
+      (etypecase spec
+	((eql &optional)
+	 (unless (eq state :required) (error "bad ~s" spec))
+	 (setf state spec))
+	((eql &rest)
+	 (unless (find state '(:required &optional)) (error "bad ~s" spec))
+	 (setf state spec))
+	((eql &allow-other-keys)
+	 (unless (or (and (eq state '&rest) rest)
+		     (find state '(:required &optional)))
+	   (error "bad ~s" spec))
+	 (setf aok-p t state spec))
+	((or symbol list)
+	 (case state
+	   ((:required) (push spec required))
+	   ((&optional) (push spec optional))
+	   ((&rest) (if restp (error "multiple ~s" state) (setf restp t rest spec)))
+	   ((&allow-other-keys) (error "specs after ~s" state))))))
+    (values (nreverse required) (nreverse optional) rest restp aok-p)))
+
 ;;; miscellaneous things, which are actually most of them
 
 #+(or)

@@ -73,3 +73,12 @@
 ;; noooooot sure about this
 (defmethod type-specifier ((not-a-ctype array-element-union))
   not-a-ctype)
+
+(defmethod type-specifier ((ctype values-ctype))
+  (with-accessors ((req values-ctype-required) (opt values-ctype-optional)
+		   (rest values-ctype-rest) (aok-p values-ctype-aok-p))
+      ctype
+    `(values ,@(mapcar #'type-specifier req)
+	     ,@(when opt `(&optional ,@(mapcar #'type-specifier opt)))
+	     ,@(when rest `(&rest ,(type-specifier rest)))
+	     ,@(when aok-p `(&allow-other-keys)))))

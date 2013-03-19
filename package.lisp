@@ -48,4 +48,7 @@
   (:export #:array-ctype
 	   #:array-ctype-element-type #:array-ctype-simplicity #:array-ctype-dimensions)
   (:export #:sub-element-type-p
-	   #:array-element-union #:array-element-union-type))
+	   #:array-element-union #:array-element-union-type)
+  ;; values
+  (:export #:values-ctype
+	   #:values-ctypep))
