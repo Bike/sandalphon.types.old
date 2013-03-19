@@ -24,12 +24,9 @@
 (defmethod intersection/2 ((t1 member-ctype) (t2 member-ctype))
   (make-instance 'member-ctype :objects (intersection (member-objects t1) (member-objects t2))))
 (defcomm intersection/2 ((t1 member-ctype) t2)
-  (let ((outcasts (remove-if-not (rcurry #'ctypep t2) (member-objects t1))))
-    (if outcasts
-	;; (and (member 2) symbol)
-	(bottom)
-	;; (and (member 2) integer)
-	t1)))
+  (if (every (rcurry #'ctypep t2) (member-objects t1))
+      t1
+      (bottom)))
 (defmethod csubtypep tri/definite ((t1 member-ctype) (t2 member-ctype))
   (values (subsetp (member-objects t1) (member-objects t2)) t))
 (defmethod csubtypep tri/definite ((t1 member-ctype) t2)
@@ -39,7 +36,7 @@
 (defmethod negate-ctype ((type member-ctype))
   (if (null (member-objects type))
       (top)
-      (make-instance 'exclusion-ctype :objects (member-objects type))))
+      (call-next-method)))
 
 ;;; (member) and nil are the same type.
 (defmethod csubtypep tri/definite ((t1 member-ctype) (t2 (eql (bottom))))
@@ -47,6 +44,9 @@
 (defmethod csubtypep tri/definite ((t1 (eql (bottom))) (t2 member-ctype))
   (values (null (member-objects t2)) t))
 ;;; no need for an EQL type, that can just expand to a MEMBER without real trouble
+
+#+exclusion
+(progn
 
 (defclass exclusion-ctype (ctype)
   ((objects :accessor exclusion-objects :initarg :objects))
@@ -86,3 +86,4 @@
 (DEFMETHOD CSUBTYPEP tri/definite ((T1 (EQL (TOP))) (T2 EXCLUSION-CTYPE))
   (VALUES (NULL (EXCLUSION-OBJECTS T2)) T))
 ;; (subtypep exclusion t) is already handled, of course
+)

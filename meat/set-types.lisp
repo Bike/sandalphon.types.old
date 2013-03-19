@@ -68,7 +68,7 @@
   (make-instance 'negation-ctype :neg ctype))
 
 (defmethod intersection/2 ((t1 negation-ctype) (t2 negation-ctype))
-  (make-instance 'negation-ctype :neg (ctype-intersection (negation-ctype-ctype t1) (negation-ctype-ctype t2))))
+  (negate-ctype (ctype-union (negation-ctype-ctype t1) (negation-ctype-ctype t2))))
 
 (defcomm intersection/2 (t1 (t2 negation-ctype))
   (if (csubtypep t1 (negation-ctype-ctype t2))
@@ -76,7 +76,7 @@
       (call-next-method)))
 
 (defmethod union/2 ((t1 negation-ctype) (t2 negation-ctype))
-  (make-instance 'negation-ctype :neg (ctype-union (negation-ctype-ctype t1) (negation-ctype-ctype t2))))
+  (negate-ctype (ctype-intersection (negation-ctype-ctype t1) (negation-ctype-ctype t2))))
 
 (defcomm union/2 ((t1 negation-ctype) t2)
   (if (csubtypep (negation-ctype-ctype t1) t2)

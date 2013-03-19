@@ -7,6 +7,7 @@
 				     (:file "figures" :depends-on ("package"))
 				     (:file "basic" :depends-on ("util" "package"))
 				     (:file "typep" :depends-on ("basic" "package"))
+				     (:file "subtypep" :depends-on ("basic" "package"))
 				     (:file "standard-atomic-subtypery" :depends-on ("basic" "util" "package"))
 				     (:file "class" :depends-on ("basic" "figures" "package"))
 				     (:file "parse" :depends-on ("basic" "figures" "package"))

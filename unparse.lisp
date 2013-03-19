@@ -26,6 +26,7 @@
 
 (defmethod type-specifier ((ctype member-ctype))
   `(member ,@(member-objects ctype)))
+#+exclusion
 (defmethod type-specifier ((ctype exclusion-ctype))
   `(not (member ,@(exclusion-objects ctype))))
 
