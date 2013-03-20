@@ -16,7 +16,8 @@
 (defmethod csubtypep tri/definite ((t1 (eql (top))) (t2 cons-ctype))
   (values nil t))
 (defmethod csubtypep tri/definite ((t1 cons-ctype) (t2 (eql (bottom))))
-  (values nil t))
+  (tri/or (bottom-type-p (cons-ctype-car-type t1))
+	  (bottom-type-p (cons-ctype-cdr-type t1))))
 
 (defmethod union/2 ((t1 cons-ctype) (t2 cons-ctype))
    (let ((car-union
